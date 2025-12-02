@@ -1,1 +1,3 @@
-# City Evacuation Simulation
+# CityEvacuationSimulation
+
+see documentation folder for infos
