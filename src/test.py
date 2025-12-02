@@ -10,7 +10,7 @@ if 'SUMO_HOME' in os.environ:
     # If you want to see the simulation, use:
     SUMO_BINARY = os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo-gui')
 else:
-    # Fallback if environment variable isn't set (may cause issues)
+    # hardcode path if env var not set
     SUMO_BINARY = "sumo"
 
 vehicle_exit_times = {}
