@@ -35,7 +35,15 @@ For me it's `C:\Users\<username>\Sumo\<date>`
 ## Generating trips in in this region
 
 generate random trips:
-`randomTrips.py -n neulengbach_sumo-webtools-osm.net.xml.gz -o routes.rou.xml`
+
+### Linux:
+`randomTrips.py`
+
+### Windows:
+`python "C:\Program Files (x86)\Eclipse\Sumo\tools\randomTrips.py"`
+
+With parameters:
+`-n ./data/neulengbach_sumo-webtools-osm.net.xml.gz -o ./data/routes.rou.xml --end 3600 --period 1.5 --vehicle-class passenger --allow-fringe`
 
 For some reason it does not generate vehicles, so that's all for now. Probably need to do that in python?
 
