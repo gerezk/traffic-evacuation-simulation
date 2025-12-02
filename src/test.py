@@ -1,7 +1,8 @@
 import traci
 import sumolib
 
-SUMO_BINARY = "sumo-gui"
+SUMO_BINARY = "/Applications/SUMO sumo-gui.app/Contents/MacOS/SUMO sumo-gui"
+
 
 vehicle_exit_times = {}
 vehicle_depart_times = {}
