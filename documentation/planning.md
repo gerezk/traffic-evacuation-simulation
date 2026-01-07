@@ -21,6 +21,15 @@ Let's do some planning here. These are just suggestions, please add your opinion
 
 Nice description of vehicles and routes: [see](https://sumo.dlr.de/docs/Definition_of_Vehicles%2C_Vehicle_Types%2C_and_Routes.html)
 
+# Scenarios
+## Baseline
+- Generate TAZs: Safe, dangerous, blockage(?)
+  - determine graphically or statically
+- Generate certain number of cars (with router atribute- reroute: bool)inside danger TAZ, and maybe in safe TAZ as well
+- Route for cars' current locaton to safe TAZ
+- Measure
+## Blockage - Informed
+## Blockage - Uninformed
 # XML files
 - Describes the maps, routes, edges etc.
 - I suggest we dont push so much of these file to git. We already have one example, We can keep most of them locally
