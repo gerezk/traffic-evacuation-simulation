@@ -2,6 +2,7 @@ import traci
 from launcher import get_sumo_cmd
 import xml.etree.ElementTree as ET
 import random
+from pathlib import Path
 
 def generate_vehicle_type(type_name, accel, decel, color, length, max_speed):
     traci.vehicletype.copy("DEFAULT_VEHTYPE", type_name)
@@ -56,10 +57,16 @@ def getEdgesForVehicleType(vehicle_type: str):
     
     return allowed_edges
 
+def blockEdge(edge):
+    traci.edge.setAllowed(edge, ["none"])
+
+def a(path):
+    return (Path(__file__).parent / path).resolve()
+
 if __name__ == "__main__":
     args = [
-        "-n", "../data/neulengbach_sumo-webtools-osm.net.xml.gz",
-        "-a", "../tmp/DangerTAZ.taz.xml",
+        "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
+        "-a", a("../tmp/DangerTAZ.taz.xml"),
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -67,7 +74,7 @@ if __name__ == "__main__":
     traci.start(SUMO_CMD)
 
     # Load the TAZ file
-    taz_file = "../tmp/DangerTAZ.taz.xml"
+    taz_file = a("../tmp/DangerTAZ.taz.xml")
     tree = ET.parse(taz_file)
     root = tree.getroot()
 
@@ -84,11 +91,13 @@ if __name__ == "__main__":
     safeEdge = getRandomEdge(safeTypedRoads)
     print("Random edge in Safe_Zone:", safeEdge)
 
+    blockEdge(safeEdge)
 
     print(traci.vehicle.getIDCount())
 
     type_name = "car"
     traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
+    
     generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
     generate_car(type_name,0,0,0)
     
