@@ -1,4 +1,5 @@
 import traci
+from traci import constants
 from launcher import get_sumo_cmd
 import xml.etree.ElementTree as ET
 import random
@@ -57,10 +58,8 @@ def getEdgesForVehicleType(vehicle_type: str):
     
     return allowed_edges
 
-def blockEdge(edgeID):
-    # traci.edge.setAllowed(edgeID, ["none"]) # needs a known vehicle class
-    # probably need to use "closed"
-    return
+def blockEdge(edgeID, vehicleType):
+    traci.edge.setDisallowed(edgeID, vehicleType)
 
 def a(path):
     return (Path(__file__).parent / path).resolve()
@@ -93,16 +92,18 @@ if __name__ == "__main__":
     safeEdge = getRandomEdge(safeTypedRoads)
     print("Random edge in Safe_Zone:", safeEdge)
 
-    blockEdge(safeEdge)
-
-    print(traci.vehicle.getIDCount())
-
     type_name = "car"
     traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
-    
+
     generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
     generate_car(type_name,"dynamicRoute",0)
     
+    # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
+    # will reroute only when at the blocked road
+    # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
+
+    # blockEdge(safeEdge)
+
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
