@@ -58,8 +58,13 @@ if __name__ == "__main__":
     traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
     generate_vehicle_type(type_name, 2.6, 4.5, (0,0,1), 5, 70)
     generate_car(type_name,0,0,0)
-    for _ in range(100): # car gets created at departer time (aftter in simulation step)
+    
+    step = 0
+    while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
-    print(traci.vehicle.getIDCount())
+        vehicle_ids = traci.vehicle.getIDList()  # vehicles currently on network
+        print(vehicle_ids)
+        print("Count:" + str(traci.vehicle.getIDCount()))
+        step += 1
 
     traci.close()
