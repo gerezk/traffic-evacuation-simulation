@@ -71,7 +71,6 @@ if __name__ == "__main__":
 
     zones = [danger_TAZ, safeTAZ]
 
-
     out_dir = Path("./tmp")
     out_dir.mkdir(parents=True, exist_ok=True)
     TAZfileName = "../tmp/DangerTAZ.taz.xml"
@@ -99,3 +98,5 @@ if __name__ == "__main__":
         fill=True,
         layer=0 # lowest so that everz other thing shows
     )
+    
+    traci.close()
