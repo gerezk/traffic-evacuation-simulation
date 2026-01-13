@@ -28,7 +28,7 @@ def getEdgesFromTaz(xmlRoot, zone):
 
 def getRandomEdge(edges):
     if not edges:
-        raise ValueError("No edges defined in Danger_Zone_0")
+        raise ValueError(f"No edges defined in {zone}")
 
     # Pick a random edge
     random_edge = random.choice(edges)
@@ -58,8 +58,8 @@ def getEdgesForVehicleType(vehicle_type: str):
 
 if __name__ == "__main__":
     args = [
-        "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",
-        "-a", "./tmp/DangerTAZ.taz.xml",
+        "-n", "../data/neulengbach_sumo-webtools-osm.net.xml.gz",
+        "-a", "../tmp/DangerTAZ.taz.xml",
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     traci.start(SUMO_CMD)
 
     # Load the TAZ file
-    taz_file = "./tmp/DangerTAZ.taz.xml"
+    taz_file = "../tmp/DangerTAZ.taz.xml"
     tree = ET.parse(taz_file)
     root = tree.getroot()
 
@@ -88,9 +88,9 @@ if __name__ == "__main__":
     print(traci.vehicle.getIDCount())
 
     type_name = "car"
-    traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge])
+    traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
     generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
-    generate_car(type_name, 0, 0, 0)
+    generate_car(type_name,0,0,0)
     
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
