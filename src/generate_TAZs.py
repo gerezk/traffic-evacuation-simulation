@@ -4,7 +4,7 @@ import sumolib
 import traci
 import math
 from sumolib.miscutils import Colorgen 
-
+from launcher import get_sumo_cmd
 
 class TAZ:
     def __init__(self, id, shape, color):
@@ -62,16 +62,24 @@ def create_TAZ_file(outf_name, TAZ_list):
         outf.write("</additional>\n")
 
 if __name__ == "__main__":
-    SUMO_BINARY = "sumo-gui"
     network_file = "./data/neulengbach_sumo-webtools-osm.net.xml.gz"
     danger_TAZ = generateCircularDangerTAZ(network_file, 0, 1500, 1500, 1000)
     safeTAZ = generate_safeTAZ(network_file,danger_TAZ.edges)
 
     zones = [danger_TAZ, safeTAZ]
     TAZfileName = "DangerTAZ.taz.xml"
+
     create_TAZ_file(TAZfileName, zones)
 
-    traci.start([SUMO_BINARY, "-n", network_file, "-r", TAZfileName])
+    args = [
+        "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",
+        "-n", network_file, 
+        "-r", TAZfileName
+    ]
+
+    SUMO_CMD = get_sumo_cmd(args, gui=True)
+
+    traci.start(SUMO_CMD)
 
     # Add polygon showing danger taz
     traci.polygon.add(

@@ -1,4 +1,5 @@
 import traci
+from launcher import get_sumo_cmd
 
 def generate_vehicle_type(type_name, accel, decel, color, length, max_speed):
     traci.vehicletype.copy("DEFAULT_VEHTYPE", type_name)
@@ -15,9 +16,13 @@ def generate_car(vehicle_type, position_x, position_y, depart_time=0 ): #didnt d
 
 
 if __name__ == "__main__":
-    SUMO_BINARY = "sumo-gui"
+    args = [
+        "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",
+    ]
 
-    traci.start([SUMO_BINARY, "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz"]) #, "-r", "./data/routes.rou.xml"])
+    SUMO_CMD = get_sumo_cmd(args, gui=True)
+
+    traci.start(SUMO_CMD)
     print(traci.vehicle.getIDCount())
 
     type_name = "car"
