@@ -16,7 +16,7 @@ def generate_car(vehicle_type, position_x, position_y, depart_time=0 ): #didnt d
     traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID="dynamicRoute") # add to simulation
     return veh_id
 
-def getRandomEdge(xmlRoot, zone):
+def getEdgesFromTaz(xmlRoot, zone):
     # Find the Danger_Zone_0 TAZ
     danger_taz = root.find(".//taz[@id='" + zone + "']")
     if danger_taz is None:
@@ -24,6 +24,9 @@ def getRandomEdge(xmlRoot, zone):
 
     # Get all edges
     edges = danger_taz.attrib.get("edges", "").split()
+    return edges
+
+def getRandomEdge(edges):
     if not edges:
         raise ValueError("No edges defined in Danger_Zone_0")
 
@@ -31,6 +34,27 @@ def getRandomEdge(xmlRoot, zone):
     random_edge = random.choice(edges)
 
     return random_edge
+
+
+
+def getEdgesForVehicleType(vehicle_type: str):
+    """
+    Seems like the default type for car is called "private"
+    """
+    allowed_lanes = []
+
+    # Get all lane IDs in the network
+    all_lanes = traci.lane.getIDList()  # returns list of lane IDs
+
+    for lane_id in all_lanes:
+        allowed = traci.lane.getAllowed(lane_id)  # list of allowed vehicle types
+        if vehicle_type in allowed or not allowed:  # empty means all types allowed
+            allowed_lanes.append(lane_id)
+    allowed_edges = []
+
+    allowed_edges = list({traci.lane.getEdgeID(lane_id) for lane_id in allowed_lanes})
+    
+    return allowed_edges
 
 if __name__ == "__main__":
     args = [
@@ -40,24 +64,33 @@ if __name__ == "__main__":
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
 
+    traci.start(SUMO_CMD)
+
     # Load the TAZ file
     taz_file = "./tmp/DangerTAZ.taz.xml"
     tree = ET.parse(taz_file)
     root = tree.getroot()
 
-    dangerEdge = getRandomEdge(root, "Danger_Zone_0")
+    privateVehicleRoads = getEdgesForVehicleType("private")
+    dangerRoads = getEdgesFromTaz(root, "Danger_Zone_0")
+    safeRoads = getEdgesFromTaz(root, "Safe_Zone")
+
+    safeTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
+    dangerTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
+
+    dangerEdge = getRandomEdge(dangerTypedRoads)
     print("Random edge in Danger_Zone_0:", dangerEdge)
 
-    safeEdge = getRandomEdge(root, "Safe_Zone")
+    safeEdge = getRandomEdge(safeTypedRoads)
     print("Random edge in Safe_Zone:", safeEdge)
 
-    traci.start(SUMO_CMD)
+
     print(traci.vehicle.getIDCount())
 
     type_name = "car"
-    traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
-    generate_vehicle_type(type_name, 2.6, 4.5, (0,0,1), 5, 70)
-    generate_car(type_name,0,0,0)
+    traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge])
+    generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
+    generate_car(type_name, 0, 0, 0)
     
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
