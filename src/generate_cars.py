@@ -18,6 +18,7 @@ def generate_car(vehicle_type, position_x, position_y, depart_time=0 ): #didnt d
 if __name__ == "__main__":
     args = [
         "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",
+        "-a", "./tmp/DangerTAZ.taz.xml",
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
