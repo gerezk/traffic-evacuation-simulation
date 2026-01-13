@@ -5,16 +5,17 @@ import xml.etree.ElementTree as ET
 import random
 from pathlib import Path
 
-def generate_vehicle_type(type_name, accel, decel, color, length, max_speed):
+def generate_vehicle_type(type_name, accel, decel, color, length, max_speed, veh_class):
     traci.vehicletype.copy("DEFAULT_VEHTYPE", type_name)
     traci.vehicletype.setAccel(type_name, accel)
     traci.vehicletype.setDecel(type_name, decel)
     traci.vehicletype.setMaxSpeed(type_name, max_speed)
     traci.vehicletype.setLength(type_name, length)
     traci.vehicletype.setColor(type_name, color)
+    traci.vehicletype.setVehicleClass(type_name, veh_class)
 
-def generate_car(vehicle_type, route_id, depart_time=0 ): #didnt decide on how to initialize position yet
-    veh_id = traci.vehicle.getIDCount() # no of currently running vehicles, since we start from 0 this gives the new id
+def generate_car(veh_id, vehicle_type, route_id, depart_time=0 ): #didnt decide on how to initialize position yet
+    # using veh id did not work cause it only counts cars that are currently driving
     traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id) # add to simulation
     return veh_id
 
@@ -50,7 +51,8 @@ def getEdgesForVehicleType(vehicle_type: str):
 
     for lane_id in all_lanes:
         allowed = traci.lane.getAllowed(lane_id)  # list of allowed vehicle types
-        if vehicle_type in allowed or not allowed:  # empty means all types allowed
+        disallowed = traci.lane.getDisallowed(lane_id)  # list of allowed vehicle types
+        if ((vehicle_type in allowed) or (not allowed)) and (vehicle_type not in disallowed):  # empty means all types allowed
             allowed_lanes.append(lane_id)
     allowed_edges = []
 
@@ -63,6 +65,13 @@ def blockEdge(edgeID, vehicleType):
 
 def a(path):
     return (Path(__file__).parent / path).resolve()
+
+def isRoutePossible(from_edge, to_edge, vtype="car"):
+    try:
+        route = traci.simulation.findRoute(from_edge, to_edge, vType=vtype)
+        return len(route.edges) > 0
+    except traci.exceptions.TraCIException:
+        return False
 
 if __name__ == "__main__":
     args = [
@@ -79,30 +88,36 @@ if __name__ == "__main__":
     tree = ET.parse(taz_file)
     root = tree.getroot()
 
-    privateVehicleRoads = getEdgesForVehicleType("private")
+    veh_type_name = "private"
+    privateVehicleRoads = getEdgesForVehicleType(veh_type_name)
     dangerRoads = getEdgesFromTaz(root, "Danger_Zone_0")
     safeRoads = getEdgesFromTaz(root, "Safe_Zone")
 
     safeTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
     dangerTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
 
-    dangerEdge = getRandomEdge(dangerTypedRoads)
-    print("Random edge in Danger_Zone_0:", dangerEdge)
+    generate_vehicle_type(veh_type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
 
-    safeEdge = getRandomEdge(safeTypedRoads)
-    print("Random edge in Safe_Zone:", safeEdge)
+    for i in range(1000):
+        dangerEdge = getRandomEdge(dangerTypedRoads)
+        print("Random edge in Danger_Zone_0:", dangerEdge)
 
-    type_name = "car"
-    traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
+        safeEdge = getRandomEdge(safeTypedRoads)
+        print("Random edge in Safe_Zone:", safeEdge)
 
-    generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
-    generate_car(type_name,"dynamicRoute",0)
-    
-    # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
-    # will reroute only when at the blocked road
-    # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
+        if not isRoutePossible(dangerEdge, safeEdge, veh_type_name):
+            continue  # pick new edges
+        
+        route_id = "dynamicRoute" + str(i)
+        traci.route.add(routeID=route_id, edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
 
-    # blockEdge(safeEdge)
+        generate_car(i, veh_type_name, route_id, 0)
+        
+        # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
+        # will reroute only when at the blocked road
+        # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
+
+        # blockEdge(safeEdge)
 
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
