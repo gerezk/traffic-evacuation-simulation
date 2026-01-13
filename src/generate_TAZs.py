@@ -23,7 +23,6 @@ class TAZ:
 
 
 def generateCircularDangerTAZ(network, id, center_x, center_y, radius, color=(255, 0, 0, 100)):
-
     net = sumolib.net.readNet(network)
     xmin, ymin, xmax, ymax = net.getBoundary() # TODO: should be used for error handling
     # print(xmin, ymin, xmax, ymax)
@@ -53,7 +52,7 @@ def generate_safeTAZ(network, danger_edges):
                 [(0,0)],
                 (0,0,0,0))
     for edge in net.getEdges():
-        if edge not in danger_edges:
+        if edge.getID() not in danger_edges:
             generated_TAZ.edges.append(edge.getID())
     return generated_TAZ
     
@@ -70,8 +69,7 @@ if __name__ == "__main__":
     safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
 
     zones = [danger_TAZ, safeTAZ]
-
-    out_dir = Path("./tmp")
+    out_dir = Path("../tmp")
     out_dir.mkdir(parents=True, exist_ok=True)
     TAZfileName = "../tmp/DangerTAZ.taz.xml"
 
@@ -82,13 +80,9 @@ if __name__ == "__main__":
         "-r", TAZfileName
     ]
 
-    if platform.system() == "Darwin": # mac
-        SUMO_BINARY = "/Library/Frameworks/EclipseSUMO.framework/EclipseSUMO/share/sumo/bin/sumo-gui"
-        args.insert(0, SUMO_BINARY)
-        traci.start(args)
-    else:
-        SUMO_CMD = get_sumo_cmd(args, gui=True)
-        traci.start(SUMO_CMD)
+    SUMO_CMD = get_sumo_cmd(args, gui=True)
+
+    traci.start(SUMO_CMD)
 
     # Add polygon showing danger taz
     traci.polygon.add(
