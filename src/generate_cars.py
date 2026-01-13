@@ -1,7 +1,9 @@
 import traci
+from traci import constants
 from launcher import get_sumo_cmd
 import xml.etree.ElementTree as ET
 import random
+from pathlib import Path
 
 def generate_vehicle_type(type_name, accel, decel, color, length, max_speed):
     traci.vehicletype.copy("DEFAULT_VEHTYPE", type_name)
@@ -11,14 +13,14 @@ def generate_vehicle_type(type_name, accel, decel, color, length, max_speed):
     traci.vehicletype.setLength(type_name, length)
     traci.vehicletype.setColor(type_name, color)
 
-def generate_car(vehicle_type, position_x, position_y, depart_time=0 ): #didnt decide on how to initialize position yet
+def generate_car(vehicle_type, route_id, depart_time=0 ): #didnt decide on how to initialize position yet
     veh_id = traci.vehicle.getIDCount() # no of currently running vehicles, since we start from 0 this gives the new id
-    traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID="dynamicRoute") # add to simulation
+    traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id) # add to simulation
     return veh_id
 
 def getEdgesFromTaz(xmlRoot, zone):
     # Find the Danger_Zone_0 TAZ
-    danger_taz = root.find(".//taz[@id='" + zone + "']")
+    danger_taz = xmlRoot.find(".//taz[@id='" + zone + "']")
     if danger_taz is None:
         raise ValueError("TAZ Danger_Zone_0 not found")
 
@@ -56,10 +58,16 @@ def getEdgesForVehicleType(vehicle_type: str):
     
     return allowed_edges
 
+def blockEdge(edgeID, vehicleType):
+    traci.edge.setDisallowed(edgeID, vehicleType)
+
+def a(path):
+    return (Path(__file__).parent / path).resolve()
+
 if __name__ == "__main__":
     args = [
-        "-n", "../data/neulengbach_sumo-webtools-osm.net.xml.gz",
-        "-a", "../tmp/DangerTAZ.taz.xml",
+        "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
+        "-a", a("../tmp/DangerTAZ.taz.xml"),
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -67,7 +75,7 @@ if __name__ == "__main__":
     traci.start(SUMO_CMD)
 
     # Load the TAZ file
-    taz_file = "../tmp/DangerTAZ.taz.xml"
+    taz_file = a("../tmp/DangerTAZ.taz.xml")
     tree = ET.parse(taz_file)
     root = tree.getroot()
 
@@ -75,8 +83,8 @@ if __name__ == "__main__":
     dangerRoads = getEdgesFromTaz(root, "Danger_Zone_0")
     safeRoads = getEdgesFromTaz(root, "Safe_Zone")
 
-    safeTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
-    dangerTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
+    safeTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
+    dangerTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
 
     dangerEdge = getRandomEdge(dangerTypedRoads)
     print("Random edge in Danger_Zone_0:", dangerEdge)
@@ -84,14 +92,18 @@ if __name__ == "__main__":
     safeEdge = getRandomEdge(safeTypedRoads)
     print("Random edge in Safe_Zone:", safeEdge)
 
-
-    print(traci.vehicle.getIDCount())
-
     type_name = "car"
     traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
+
     generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
-    generate_car(type_name,0,0,0)
+    generate_car(type_name,"dynamicRoute",0)
     
+    # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
+    # will reroute only when at the blocked road
+    # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
+
+    # blockEdge(safeEdge)
+
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
