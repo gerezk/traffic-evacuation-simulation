@@ -32,3 +32,5 @@ if __name__ == "__main__":
     for _ in range(1): # car gets created at departer time (aftter in simulation step)
         traci.simulationStep()
     print(traci.vehicle.getIDCount())
+
+    traci.close()
