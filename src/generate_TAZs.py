@@ -68,6 +68,10 @@ if __name__ == "__main__":
     safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
 
     zones = [danger_TAZ, safeTAZ]
+
+
+    out_dir = Path("./tmp")
+    out_dir.mkdir(parents=True, exist_ok=True)
     TAZfileName = "./tmp/DangerTAZ.taz.xml"
 
     create_TAZ_file(TAZfileName, zones)
