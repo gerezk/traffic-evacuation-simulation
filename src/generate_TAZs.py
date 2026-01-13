@@ -6,7 +6,6 @@ import math
 from sumolib.miscutils import Colorgen 
 from launcher import get_sumo_cmd
 from pathlib import Path
-import platform
 
 # traffic assignment zone
 class TAZ:
@@ -23,7 +22,6 @@ class TAZ:
 
 
 def generateCircularDangerTAZ(network, id, center_x, center_y, radius, color=(255, 0, 0, 100)):
-
     net = sumolib.net.readNet(network)
     xmin, ymin, xmax, ymax = net.getBoundary() # TODO: should be used for error handling
     # print(xmin, ymin, xmax, ymax)
@@ -53,7 +51,7 @@ def generate_safeTAZ(network, danger_edges):
                 [(0,0)],
                 (0,0,0,0))
     for edge in net.getEdges():
-        if edge not in danger_edges:
+        if edge.getID() not in danger_edges:
             generated_TAZ.edges.append(edge.getID())
     return generated_TAZ
     
@@ -66,29 +64,25 @@ def create_TAZ_file(outf_name, TAZ_list):
 
 if __name__ == "__main__":
     network_file = "../data/neulengbach_sumo-webtools-osm.net.xml.gz"
-    danger_TAZ = generateCircularDangerTAZ(network_file, 0, 1500, 1500, 1000)
-    safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
+    network_file_abs = (Path(__file__).parent / network_file).resolve()
+    danger_TAZ = generateCircularDangerTAZ(network_file_abs, 0, 1500, 1500, 1000)
+    safeTAZ = generate_safeTAZ(network_file_abs, danger_TAZ.edges)
 
     zones = [danger_TAZ, safeTAZ]
-
-    out_dir = Path("./tmp")
+    out_dir = Path("../tmp")
     out_dir.mkdir(parents=True, exist_ok=True)
     TAZfileName = "../tmp/DangerTAZ.taz.xml"
 
     create_TAZ_file(TAZfileName, zones)
 
     args = [
-        "-n", network_file, 
+        "-n", network_file_abs, 
         "-r", TAZfileName
     ]
 
-    if platform.system() == "Darwin": # mac
-        SUMO_BINARY = "/Library/Frameworks/EclipseSUMO.framework/EclipseSUMO/share/sumo/bin/sumo-gui"
-        args.insert(0, SUMO_BINARY)
-        traci.start(args)
-    else:
-        SUMO_CMD = get_sumo_cmd(args, gui=True)
-        traci.start(SUMO_CMD)
+    SUMO_CMD = get_sumo_cmd(args, gui=True)
+
+    traci.start(SUMO_CMD)
 
     # Add polygon showing danger taz
     traci.polygon.add(
