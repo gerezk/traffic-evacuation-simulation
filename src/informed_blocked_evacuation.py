@@ -37,10 +37,34 @@ print("Random edge in Safe_Zone:", safeEdge)
 gTAZ.block_roads(dangerTypedRoads,10)
 
 type_name = "car"
+veh_type_name = "private"
+
 traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
 
-gc.generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
-gc.generate_car(type_name,"dynamicRoute",0)
+# gc.generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
+# gc.generate_car(0, veh_type_name, "dynamicRoute", 0)
+
+gc.generate_vehicle_type(veh_type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
+
+dangerEdge = gc.getRandomEdge(dangerTypedRoads)
+print("Random edge in Danger_Zone_0:", dangerEdge)
+
+safeEdge = gc.getRandomEdge(safeTypedRoads)
+print("Random edge in Safe_Zone:", safeEdge)
+
+# if not gc.isRoutePossible(dangerEdge, safeEdge, veh_type_name):
+#     continue  # pick new edges
+
+route_id = "dynamicRoute" + str(0)
+traci.route.add(routeID=route_id, edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
+
+gc.generate_car(0, veh_type_name, route_id, 0)
+        
+        # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
+        # will reroute only when at the blocked road
+        # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
+
+        # blockEdge(safeEdge)
 
 
 
