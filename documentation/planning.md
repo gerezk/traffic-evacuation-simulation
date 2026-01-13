@@ -21,6 +21,8 @@ Let's do some planning here. These are just suggestions, please add your opinion
 
 Nice description of vehicles and routes: [see](https://sumo.dlr.de/docs/Definition_of_Vehicles%2C_Vehicle_Types%2C_and_Routes.html)
 
+Maybe all we need: https://sumo.dlr.de/docs/Tools/Trip.html
+
 # Scenarios
 ## Baseline
 - Generate TAZs: Safe, dangerous, blockage(?)
