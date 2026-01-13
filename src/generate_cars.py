@@ -13,9 +13,9 @@ def generate_vehicle_type(type_name, accel, decel, color, length, max_speed):
     traci.vehicletype.setLength(type_name, length)
     traci.vehicletype.setColor(type_name, color)
 
-def generate_car(vehicle_type, position_x, position_y, depart_time=0 ): #didnt decide on how to initialize position yet
+def generate_car(vehicle_type, route_id, depart_time=0 ): #didnt decide on how to initialize position yet
     veh_id = traci.vehicle.getIDCount() # no of currently running vehicles, since we start from 0 this gives the new id
-    traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID="dynamicRoute") # add to simulation
+    traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id) # add to simulation
     return veh_id
 
 def getEdgesFromTaz(xmlRoot, zone):
@@ -96,14 +96,14 @@ if __name__ == "__main__":
     traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
 
     generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70)
-    carID = generate_car(type_name,0,0,0)
-
+    generate_car(type_name,"dynamicRoute",0)
+    
     # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
     # will reroute only when at the blocked road
     # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
 
     # blockEdge(safeEdge)
-    
+
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
