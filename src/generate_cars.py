@@ -19,7 +19,7 @@ def generate_car(vehicle_type, position_x, position_y, depart_time=0 ): #didnt d
 
 def getEdgesFromTaz(xmlRoot, zone):
     # Find the Danger_Zone_0 TAZ
-    danger_taz = root.find(".//taz[@id='" + zone + "']")
+    danger_taz = xmlRoot.find(".//taz[@id='" + zone + "']")
     if danger_taz is None:
         raise ValueError("TAZ Danger_Zone_0 not found")
 
@@ -57,8 +57,10 @@ def getEdgesForVehicleType(vehicle_type: str):
     
     return allowed_edges
 
-def blockEdge(edge):
-    traci.edge.setAllowed(edge, ["none"])
+def blockEdge(edgeID):
+    # traci.edge.setAllowed(edgeID, ["none"]) # needs a known vehicle class
+    # probably need to use "closed"
+    return
 
 def a(path):
     return (Path(__file__).parent / path).resolve()
@@ -82,8 +84,8 @@ if __name__ == "__main__":
     dangerRoads = getEdgesFromTaz(root, "Danger_Zone_0")
     safeRoads = getEdgesFromTaz(root, "Safe_Zone")
 
-    safeTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
-    dangerTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
+    safeTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
+    dangerTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
 
     dangerEdge = getRandomEdge(dangerTypedRoads)
     print("Random edge in Danger_Zone_0:", dangerEdge)
