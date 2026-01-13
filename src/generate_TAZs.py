@@ -5,6 +5,8 @@ import traci
 import math
 from sumolib.miscutils import Colorgen 
 from launcher import get_sumo_cmd
+from pathlib import Path
+import platform
 
 # traffic assignment zone
 class TAZ:
@@ -63,7 +65,7 @@ def create_TAZ_file(outf_name, TAZ_list):
         outf.write("</additional>\n")
 
 if __name__ == "__main__":
-    network_file = "./data/neulengbach_sumo-webtools-osm.net.xml.gz"
+    network_file = "../data/neulengbach_sumo-webtools-osm.net.xml.gz"
     danger_TAZ = generateCircularDangerTAZ(network_file, 0, 1500, 1500, 1000)
     safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
 
@@ -71,7 +73,7 @@ if __name__ == "__main__":
 
     out_dir = Path("./tmp")
     out_dir.mkdir(parents=True, exist_ok=True)
-    TAZfileName = "./tmp/DangerTAZ.taz.xml"
+    TAZfileName = "../tmp/DangerTAZ.taz.xml"
 
     create_TAZ_file(TAZfileName, zones)
 
@@ -80,9 +82,13 @@ if __name__ == "__main__":
         "-r", TAZfileName
     ]
 
-    SUMO_CMD = get_sumo_cmd(args, gui=True)
-
-    traci.start(SUMO_CMD)
+    if platform.system() == "Darwin": # mac
+        SUMO_BINARY = "/Library/Frameworks/EclipseSUMO.framework/EclipseSUMO/share/sumo/bin/sumo-gui"
+        args.insert(0, SUMO_BINARY)
+        traci.start(args)
+    else:
+        SUMO_CMD = get_sumo_cmd(args, gui=True)
+        traci.start(SUMO_CMD)
 
     # Add polygon showing danger taz
     traci.polygon.add(
