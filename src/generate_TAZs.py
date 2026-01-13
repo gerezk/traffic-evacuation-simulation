@@ -7,6 +7,10 @@ from sumolib.miscutils import Colorgen
 from launcher import get_sumo_cmd
 from pathlib import Path
 
+import random
+import copy
+
+
 # traffic assignment zone
 class TAZ:
     def __init__(self, id, shape, color):
@@ -62,6 +66,18 @@ def create_TAZ_file(outf_name, TAZ_list):
             taz.write(outf)
         outf.write("</additional>\n")
 
+def block_roads(zone_edge_list, num_to_block):
+    blocked_edges = []
+    copy_edges_list= copy.deepcopy(zone_edge_list)
+    # todo: handle if too many edges are blocked. eg %80
+    for i in range(num_to_block):
+        selected_int = random.randint(0, len(copy_edges_list))
+        selected_edge_id= copy_edges_list[selected_int]
+        blocked_edges.append(selected_edge_id)
+        copy_edges_list.pop(selected_int)
+        traci.edge.setAllowed(selected_edge_id, "")
+
+     
 if __name__ == "__main__":
     network_file = "../data/neulengbach_sumo-webtools-osm.net.xml.gz"
     network_file_abs = (Path(__file__).parent / network_file).resolve()
