@@ -6,6 +6,7 @@ import math
 from sumolib.miscutils import Colorgen 
 from launcher import get_sumo_cmd
 
+# traffic assignment zone
 class TAZ:
     def __init__(self, id, shape, color):
         self.id = id
@@ -64,15 +65,14 @@ def create_TAZ_file(outf_name, TAZ_list):
 if __name__ == "__main__":
     network_file = "./data/neulengbach_sumo-webtools-osm.net.xml.gz"
     danger_TAZ = generateCircularDangerTAZ(network_file, 0, 1500, 1500, 1000)
-    safeTAZ = generate_safeTAZ(network_file,danger_TAZ.edges)
+    safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
 
     zones = [danger_TAZ, safeTAZ]
-    TAZfileName = "DangerTAZ.taz.xml"
+    TAZfileName = "./tmp/DangerTAZ.taz.xml"
 
     create_TAZ_file(TAZfileName, zones)
 
     args = [
-        "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",
         "-n", network_file, 
         "-r", TAZfileName
     ]
