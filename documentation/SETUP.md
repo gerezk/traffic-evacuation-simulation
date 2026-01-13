@@ -45,7 +45,9 @@ generate random trips:
 With parameters:
 `-n ./data/neulengbach_sumo-webtools-osm.net.xml.gz -o ./data/routes.rou.xml --end 3600 --period 1.5 --vehicle-class passenger --allow-fringe`
 
-For some reason it does not generate vehicles, so that's all for now. Probably need to do that in python?
+For some reason it does not generate vehicles, so that's all for now. Probably need to do that in python?  
+    - It does generate vehicles, you can see them when you run the simulation. They are small and they slowly all escape the frame.
+    It is all defined in the route file. We can do it more orderly
 
 ## Communication between python and sumo
 

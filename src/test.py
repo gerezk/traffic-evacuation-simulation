@@ -1,24 +1,21 @@
 import traci
 import sumolib
-import os
+import shutil
+from launcher import get_sumo_cmd
 
-# Define the path to the SUMO executable
-# Assuming SUMO_HOME is set and contains the path to the main directory
-if 'SUMO_HOME' in os.environ:
-    # Use sumo if you want to run without the graphical interface
-    # SUMO_BINARY = os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo')
-    # If you want to see the simulation, use:
-    SUMO_BINARY = os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo-gui')
-else:
-    # hardcode path if env var not set
-    SUMO_BINARY = "sumo"
+args = [
+    "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",
+    "-r", "./data/routes.rou.xml",
+]
+
+SUMO_CMD = get_sumo_cmd(args, gui=True)
 
 vehicle_exit_times = {}
 vehicle_depart_times = {}
 
 def run_simulation():
-    traci.start([SUMO_BINARY, "-n", "./data/neulengbach_sumo-webtools-osm.net.xml", "-r", "./data/routes.rou.xml"])
-    
+    traci.start(SUMO_CMD)
+
     # Get all route IDs from the loaded routes file
     route_ids = traci.route.getIDList()  # returns list of route IDs
     print(route_ids)
