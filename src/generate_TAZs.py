@@ -25,7 +25,7 @@ class TAZ:
          ' '.join(self.edges)))
 
 
-def generateCircularDangerTAZ(network, id, center_x, center_y, radius, color=(255, 0, 0, 100)):
+def generateCircularTAZ(network, id, center_x, center_y, radius, color=(255, 0, 0, 100)):
     net = sumolib.net.readNet(network)
     xmin, ymin, xmax, ymax = net.getBoundary() # TODO: should be used for error handling
     # print(xmin, ymin, xmax, ymax)
@@ -37,7 +37,7 @@ def generateCircularDangerTAZ(network, id, center_x, center_y, radius, color=(25
         polygon_rep_circle.append((center_x+radius*math.sin(angle), center_y+radius*math.cos(angle)))
     polygon_rep_circle.append(polygon_rep_circle[0]) # close the polygon
 
-    generated_TAZ = TAZ("Danger_Zone_%s" % (id),
+    generated_TAZ = TAZ(f"Zone_{id}",
                     polygon_rep_circle,
                     polygon_color)
     for edge in net.getEdges():
@@ -87,19 +87,20 @@ def a(path):
      
 if __name__ == "__main__":
     network_file = a("../data/neulengbach_sumo-webtools-osm.net.xml.gz")
-    danger_TAZ = generateCircularDangerTAZ(network_file, 0, 1250, 1100, 800)
+    danger_TAZ = generateCircularTAZ(network_file, 0, 1250, 1100, 800)
+    blocked_TAZ = generateCircularTAZ(network_file, 1, 1250, 1100, 500, color=(120, 120, 0, 100)) #used by the generation of the uninformed blockages, so the blockades are somewhere in the inner city
     safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
 
-    zones = [danger_TAZ, safeTAZ]
+    zones = [danger_TAZ, blocked_TAZ, safeTAZ]
     out_dir = Path("../tmp")
     out_dir.mkdir(parents=True, exist_ok=True)
-    TAZfileName = a("../tmp/DangerTAZ.taz.xml")
+    dangerTAZfileName = a("../tmp/TAZ.taz.xml")
 
-    create_TAZ_file(TAZfileName, zones)
+    create_TAZ_file(dangerTAZfileName, zones)
 
     args = [
         "-n", network_file, 
-        "-r", TAZfileName
+        "-r", dangerTAZfileName
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -113,6 +114,15 @@ if __name__ == "__main__":
         color=danger_TAZ.color,  # RGBA
         fill=True,
         layer=0 # lowest so that everz other thing shows
+    )
+
+    # Add polygon showing danger taz
+    traci.polygon.add(
+        polygonID="blockedZonePoly",
+        shape=blocked_TAZ.shape,
+        color=blocked_TAZ.color,
+        fill=True,
+        layer=1
     )
     
     traci.close()

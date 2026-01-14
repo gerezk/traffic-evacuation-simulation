@@ -21,7 +21,7 @@ def generate_car(veh_id, vehicle_type, route_id, depart_time=0 ): #didnt decide 
     return veh_id
 
 def getEdgesFromTaz(xmlRoot, zone):
-    # Find the Danger_Zone_0 TAZ
+    # Find the Zone_0 TAZ (Danger)
     danger_taz = xmlRoot.find(".//taz[@id='" + zone + "']")
     if danger_taz is None:
         raise ValueError("TAZ Danger_Zone_0 not found")
@@ -77,7 +77,7 @@ def isRoutePossible(from_edge, to_edge, vtype="car"):
 if __name__ == "__main__":
     args = [
         "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
-        "-a", a("../tmp/DangerTAZ.taz.xml") + "," + a("../data/rerouter.add.xml"),
+        "-a", a("../tmp/TAZ.taz.xml") + "," + a("../data/rerouter.add.xml"),
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -85,13 +85,13 @@ if __name__ == "__main__":
     traci.start(SUMO_CMD)
 
     # Load the TAZ file
-    taz_file = a("../tmp/DangerTAZ.taz.xml")
+    taz_file = a("../tmp/TAZ.taz.xml")
     tree = ET.parse(taz_file)
     root = tree.getroot()
 
     veh_type_name = "private"
     privateVehicleRoads = getEdgesForVehicleType(veh_type_name)
-    dangerRoads = getEdgesFromTaz(root, "Danger_Zone_0")
+    dangerRoads = getEdgesFromTaz(root, "Zone_0")
     safeRoads = getEdgesFromTaz(root, "Safe_Zone")
 
     safeTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     for i in range(500):
         dangerEdge = getRandomEdge(dangerTypedRoads)
-        print("Random edge in Danger_Zone_0:", dangerEdge)
+        print("Random edge in Zone_0:", dangerEdge)
 
         safeEdge = getRandomEdge(safeTypedRoads)
         print("Random edge in Safe_Zone:", safeEdge)

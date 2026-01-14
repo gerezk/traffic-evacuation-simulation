@@ -9,12 +9,12 @@ BLOCKED_ROADS_COUNT = 5
 TRIGGER_STEPS = 3
 OUT_FILE = "./data/rerouter.add.xml"
 
-taz_file = "./tmp/DangerTAZ.taz.xml"
+taz_file = "./tmp/TAZ.taz.xml"
 tree = ET.parse(taz_file)
 root = tree.getroot()
 
 net = sumolib.net.readNet("./data/neulengbach_sumo-webtools-osm.net.xml.gz")
-dangerRoads = gc.getEdgesFromTaz(root, "Danger_Zone_0")
+blockableRoads = gc.getEdgesFromTaz(root, "Zone_1")
 
 def a(path):
     return str((Path(__file__).parent / path).resolve())
@@ -44,7 +44,7 @@ def get_adjacent_edges(start_edge, steps):
 
 args = [
     "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
-    "-a", a("../tmp/DangerTAZ.taz.xml"),
+    "-a", a("../tmp/TAZ.taz.xml"),
 ]
 
 SUMO_CMD = get_sumo_cmd(args, gui=False)
@@ -54,7 +54,7 @@ blocked_edges = set()
 trigger_edges = set()
 
 for _ in range(BLOCKED_ROADS_COUNT):
-    blocked = gc.getRandomEdge(dangerRoads)
+    blocked = gc.getRandomEdge(blockableRoads)
     blocked_edges.add(blocked)
     print(f"added {blocked} to blocked_edges")
     neighbors = get_adjacent_edges(blocked, TRIGGER_STEPS)
