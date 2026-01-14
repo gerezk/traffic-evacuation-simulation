@@ -34,6 +34,9 @@ Maybe all we need: https://sumo.dlr.de/docs/Tools/Trip.html
 - Measure
 ## Blockage - Informed
 ## Blockage - Uninformed
+- Issues:
+  - "vehicles that cannot reach their destination by an alternative route simply continue on their old route and will effectively ignore the closing of the edges." So either we ignore this and just present a working blocked road or we find a way to change the destination of a car in this case
+  - 
 # XML files
 - Describes the maps, routes, edges etc.
 - I suggest we dont push so much of these file to git. We already have one example, We can keep most of them locally
