@@ -17,6 +17,7 @@ def generate_vehicle_type(type_name, accel, decel, color, length, max_speed, veh
 def generate_car(veh_id, vehicle_type, route_id, depart_time=0 ): #didnt decide on how to initialize position yet
     # using veh id did not work cause it only counts cars that are currently driving
     traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id) # add to simulation
+    #traci.vehicle.setRoutingMode(i, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
     return veh_id
 
 def getEdgesFromTaz(xmlRoot, zone):
@@ -64,7 +65,7 @@ def blockEdge(edgeID, vehicleType):
     traci.edge.setDisallowed(edgeID, vehicleType)
 
 def a(path):
-    return (Path(__file__).parent / path).resolve()
+    return str((Path(__file__).parent / path).resolve())
 
 def isRoutePossible(from_edge, to_edge, vtype="car"):
     try:
@@ -76,7 +77,7 @@ def isRoutePossible(from_edge, to_edge, vtype="car"):
 if __name__ == "__main__":
     args = [
         "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
-        "-a", a("../tmp/DangerTAZ.taz.xml"),
+        "-a", a("../tmp/DangerTAZ.taz.xml") + "," + a("../data/rerouter.add.xml"),
     ]
 
     SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -98,7 +99,7 @@ if __name__ == "__main__":
 
     generate_vehicle_type(veh_type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
 
-    for i in range(1000):
+    for i in range(500):
         dangerEdge = getRandomEdge(dangerTypedRoads)
         print("Random edge in Danger_Zone_0:", dangerEdge)
 
@@ -115,7 +116,6 @@ if __name__ == "__main__":
         
         # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
         # will reroute only when at the blocked road
-        # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
 
         # blockEdge(safeEdge)
 
