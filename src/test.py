@@ -1,7 +1,7 @@
 import traci
 import sumolib
 import shutil
-from launcher import get_sumo_cmd
+from utils import get_sumo_cmd
 
 args = [
     "-n", "./data/neulengbach_sumo-webtools-osm.net.xml.gz",

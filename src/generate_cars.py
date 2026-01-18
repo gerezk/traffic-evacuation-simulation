@@ -1,10 +1,8 @@
 import traci
-from traci import constants
-from launcher import get_sumo_cmd
-from utils import a
 import xml.etree.ElementTree as ET
 import random
-from pathlib import Path
+
+from utils import a, get_sumo_cmd
 
 def generate_vehicle_type(type_name, accel, decel, color, length, max_speed, veh_class):
     traci.vehicletype.copy("DEFAULT_VEHTYPE", type_name)

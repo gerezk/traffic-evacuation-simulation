@@ -3,13 +3,11 @@
 import sumolib  
 import traci
 import math
-from sumolib.miscutils import Colorgen 
-from launcher import get_sumo_cmd
 from pathlib import Path
-from utils import a
-
 import random
 import copy
+
+from utils import a, get_sumo_cmd
 
 
 # traffic assignment zone

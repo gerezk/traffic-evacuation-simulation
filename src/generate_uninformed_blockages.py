@@ -1,10 +1,10 @@
 import traci
-import generate_cars as gc
-from utils import a
 import xml.etree.ElementTree as ET
-from launcher import get_sumo_cmd
-from pathlib import Path
 import sumolib
+
+import generate_cars as gc
+from utils import a, get_sumo_cmd
+
 
 BLOCKED_ROADS_COUNT = 5
 TRIGGER_STEPS = 3

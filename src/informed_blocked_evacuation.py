@@ -1,11 +1,8 @@
 import traci
-from traci import constants
-from launcher import get_sumo_cmd
 import xml.etree.ElementTree as ET
-import random
-from pathlib import Path
+
 import generate_cars as gc
-from utils import a
+from utils import a, get_sumo_cmd
 import generate_TAZs as gTAZ
 
 
