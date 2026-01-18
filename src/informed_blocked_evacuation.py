@@ -5,12 +5,13 @@ import xml.etree.ElementTree as ET
 import random
 from pathlib import Path
 import generate_cars as gc
+from utils import a
 import generate_TAZs as gTAZ
 
 
 args = [
-    "-n", gc.a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
-    "-a", gc.a("../tmp/DangerTAZ.taz.xml"),
+    "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
+    "-a", a("../tmp/TAZ.taz.xml"),
 ]
 
 SUMO_CMD = get_sumo_cmd(args, gui=True)
@@ -18,7 +19,7 @@ SUMO_CMD = get_sumo_cmd(args, gui=True)
 traci.start(SUMO_CMD)
 
 # Load the TAZ file
-taz_file = gc.a("../tmp/DangerTAZ.taz.xml")
+taz_file = a("../tmp/TAZ.taz.xml")
 tree = ET.parse(taz_file)
 root = tree.getroot()
 

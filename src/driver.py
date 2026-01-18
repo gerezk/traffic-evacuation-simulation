@@ -1,36 +1,35 @@
 import yaml
 from pathlib import Path
-from typing import List
+from utils import a
 import random
 import pandas as pd
+import generate_TAZs
 
-def load_config(path: Path) -> dict:
-    with open(path, "r") as f:
-        cfg_ = yaml.safe_load(f)
-
-    return cfg_
-
-def generate_seeds(parent_seed, n) -> List[int]:
-    # Seed the random number generator with the parent seed
-    random.seed(parent_seed)
-
-    # Generate n seeds
-    seeds_ = [random.randint(1 << 31, (1 << 32) - 1) for _ in range(n)]
-
-    return seeds_
-
+# load config
 config_path = Path("config.yaml")
-cfg = load_config(config_path)
+with open(config_path, "r") as f:
+    cfg = yaml.safe_load(f)
 
 # overwrite n_sims if gui set to True
 if cfg["gui"]:
     cfg["n_sims"] = 1
 
+# set sumo args
+sumo_args = [
+    "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
+    "-a", a("../tmp/TAZ.taz.xml") + "," + a("../data/rerouter.add.xml"),
+]
+
+# if TAZ.tax.xml not in ../tmp, create file
+generate_TAZs.main()
+
 # generate set of random seeds
-seeds = generate_seeds(cfg["seed"], n=cfg["n_sims"])
+random.seed(cfg["seed"])
+seeds = [random.randint(1 << 31, (1 << 32) - 1) for _ in range(cfg["n_sims"])]
 
-# collect output from each sim
+# run and collect output from n_sims
 
-# combine to single df
+
+# combine output to single df
 
 # export to csv

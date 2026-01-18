@@ -6,6 +6,7 @@ import math
 from sumolib.miscutils import Colorgen 
 from launcher import get_sumo_cmd
 from pathlib import Path
+from utils import a
 
 import random
 import copy
@@ -82,13 +83,11 @@ def block_roads(zone_edge_list, num_to_block):
         traci.edge.setDisallowed(selected_edge_id, "private")
         # traci.edge.setAllowed(selected_edge_id, "none")
 
-def a(path):
-    return str((Path(__file__).parent / path).resolve())
-     
-if __name__ == "__main__":
+def main():
     network_file = a("../data/neulengbach_sumo-webtools-osm.net.xml.gz")
     danger_TAZ = generateCircularTAZ(network_file, 0, 1250, 1100, 800)
-    blocked_TAZ = generateCircularTAZ(network_file, 1, 1250, 1100, 500, color=(120, 120, 0, 100)) #used by the generation of the uninformed blockages, so the blockades are somewhere in the inner city
+    blocked_TAZ = generateCircularTAZ(network_file, 1, 1250, 1100, 500, color=(120, 120, 0,
+                                                                               100))  # used by the generation of the uninformed blockages, so the blockades are somewhere in the inner city
     safeTAZ = generate_safeTAZ(network_file, danger_TAZ.edges)
 
     zones = [danger_TAZ, blocked_TAZ, safeTAZ]
@@ -99,11 +98,11 @@ if __name__ == "__main__":
     create_TAZ_file(dangerTAZfileName, zones)
 
     args = [
-        "-n", network_file, 
+        "-n", network_file,
         "-r", dangerTAZfileName
     ]
 
-    SUMO_CMD = get_sumo_cmd(args, gui=True)
+    SUMO_CMD = get_sumo_cmd(args, gui=False)
 
     traci.start(SUMO_CMD)
 
@@ -113,7 +112,7 @@ if __name__ == "__main__":
         shape=danger_TAZ.shape,
         color=danger_TAZ.color,  # RGBA
         fill=True,
-        layer=0 # lowest so that everz other thing shows
+        layer=0  # lowest so that everz other thing shows
     )
 
     # Add polygon showing danger taz
@@ -124,5 +123,8 @@ if __name__ == "__main__":
         fill=True,
         layer=1
     )
-    
+
     traci.close()
+
+if __name__ == "__main__":
+    main()

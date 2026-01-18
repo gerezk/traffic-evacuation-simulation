@@ -1,6 +1,7 @@
 import traci
 from traci import constants
 from launcher import get_sumo_cmd
+from utils import a
 import xml.etree.ElementTree as ET
 import random
 from pathlib import Path
@@ -63,9 +64,6 @@ def getEdgesForVehicleType(vehicle_type: str):
 
 def blockEdge(edgeID, vehicleType):
     traci.edge.setDisallowed(edgeID, vehicleType)
-
-def a(path):
-    return str((Path(__file__).parent / path).resolve())
 
 def isRoutePossible(from_edge, to_edge, vtype="car"):
     try:

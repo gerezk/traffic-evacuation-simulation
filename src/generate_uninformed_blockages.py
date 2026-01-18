@@ -1,5 +1,6 @@
 import traci
 import generate_cars as gc
+from utils import a
 import xml.etree.ElementTree as ET
 from launcher import get_sumo_cmd
 from pathlib import Path
@@ -15,9 +16,6 @@ root = tree.getroot()
 
 net = sumolib.net.readNet("./data/neulengbach_sumo-webtools-osm.net.xml.gz")
 blockableRoads = gc.getEdgesFromTaz(root, "Zone_1")
-
-def a(path):
-    return str((Path(__file__).parent / path).resolve())
 
 def get_adjacent_edges(start_edge, steps):
     visited = set()
