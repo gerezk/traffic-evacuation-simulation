@@ -1,0 +1,6 @@
+scenario: 1 # baseline (1), informed (2), uninformed (3)
+n_cars: 1000 # number of cars
+n_sims: 100 # number of simulations
+blocked_edge: # edge id; unused if scenario=1
+seed: 42
+gui: False # if True, n_sims overwritten to 1
