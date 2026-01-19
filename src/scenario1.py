@@ -1,10 +1,11 @@
 import traci
 from typing import List
+import pandas as pd
 
 import utils
 
 
-def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool):
+def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool) -> pd.DataFrame:
     """
     :param path_TAZ: absolute path to the TAZ file, from config file
     :param args: sumo arguments passed to the script
@@ -35,6 +36,12 @@ def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool):
     # initialize n_cars in the sim
     utils.initialize_cars(seed, n_cars, safeTypedRoads, dangerTypedRoads, veh_type_name)
 
+    # initialize dictionary for return
+    output = {
+        "seed": seed,
+        "total_evac_time": -1
+    }
+
     # run and step through sim
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
@@ -45,7 +52,9 @@ def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool):
         step += 1
 
     traci.close()
-    print("Sim done")
+
+    output["total_evac_time"] = step
+    return pd.DataFrame(output, index=[0])
 
 if __name__ == "__main__":
     abs_path_TAZ = utils.a("../tmp/TAZ.taz.xml")
