@@ -1,82 +1,69 @@
 import traci
 import xml.etree.ElementTree as ET
+from typing import List
+import pandas as pd
 
 import utils
 
 
-args = [
-    "-n", utils.a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
-    "-a", utils.a("../tmp/TAZ.taz.xml"),
-]
+def main(path_TAZ: str, args: List[str], n_cars: int, blocked_edges: List[str], seed: int, gui: bool) -> pd.DataFrame:
+    args = [
+        "-n", utils.a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
+        "--no-warnings",
+        "-a", utils.a("../tmp/TAZ.taz.xml"),
+    ]
 
-SUMO_CMD = utils.get_sumo_cmd(args, gui=True)
+    # append seed to sumo args - seed must be set in both random and sumo
+    args = args + ["--seed", str(seed)]
 
-traci.start(SUMO_CMD)
+    SUMO_CMD = utils.get_sumo_cmd(args, gui)
 
-# Load the TAZ file
-taz_file = utils.a("../tmp/TAZ.taz.xml")
-tree = ET.parse(taz_file)
-root = tree.getroot()
+    traci.start(SUMO_CMD)
 
-privateVehicleRoads = utils.getEdgesForVehicleType("private")
-dangerRoads = utils.getEdgesFromTaz(root, "Zone_0")
-safeRoads = utils.getEdgesFromTaz(root, "Safe_Zone")
+    # get root path to TAZ file
+    root_TAZ = utils.get_root_TAZ(path_TAZ)
 
-safeTypedRoads = list(set(privateVehicleRoads) & set(safeRoads)) # both conditions
-dangerTypedRoads = list(set(privateVehicleRoads) & set(dangerRoads)) # both conditions
+    # block roads
+    veh_type_name = "private"
+    for edge in blocked_edges:
+        utils.blockEdge(edge,"private")
 
-dangerEdge = utils.getRandomEdge(dangerTypedRoads, "Zone_0")
-print("Random edge in Danger_Zone_0:", dangerEdge)
+    # filter for edges that allow given vehicle type - duplicated code wih scenario1.py
+    safe_zone_name, danger_zone_name = utils.get_zone_names()
+    safeTypedRoads, dangerTypedRoads = utils.filter_edges_by_veh_type(root_TAZ, veh_type_name, danger_zone_name, safe_zone_name)
 
-safeEdge = utils.getRandomEdge(safeTypedRoads, "Safe_Zone")
-print("Random edge in Safe_Zone:", safeEdge)
+    utils.generate_vehicle_type(veh_type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
 
-utils.blockEdge("489244165#0","private")
+    # initialize n_cars in the sim
+    utils.initialize_cars(seed, n_cars, safeTypedRoads, dangerTypedRoads, veh_type_name)
 
-type_name = "car"
-veh_type_name = "private"
+    # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
+    # will reroute only when at the blocked road
+    # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
 
-traci.route.add(routeID="dynamicRoute", edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
+    # initialize dictionary for return
+    output = {
+        "seed": seed,
+        "total_evac_time": -1
+    }
 
-# gc.generate_vehicle_type(type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
-# gc.generate_car(0, veh_type_name, "dynamicRoute", 0)
+    # run and step through sim
+    step = 0
+    while traci.simulation.getMinExpectedNumber() > 0:
+        traci.simulationStep()
+        vehicle_ids = traci.vehicle.getIDList()  # vehicles currently in network
+        step += 1
+    traci.close()
 
-utils.generate_vehicle_type(veh_type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)
+    output["total_evac_time"] = step
+    return pd.DataFrame(output, index=[0])
 
-dangerEdge = utils.getRandomEdge(dangerTypedRoads, "Zone_0")
-print("Random edge in Danger_Zone_0:", dangerEdge)
+if __name__ == "__main__":
+    abs_path_TAZ = utils.a("../tmp/TAZ.taz.xml")
+    sumo_args = [
+        "-n", utils.a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
+        "-a", utils.a("../tmp/TAZ.taz.xml"),
+    ]
+    blocked_edges = ["489244165#0", "-489244165#1"]
 
-safeEdge = utils.getRandomEdge(safeTypedRoads, "Safe_Zone")
-print("Random edge in Safe_Zone:", safeEdge)
-
-# if not gc.isRoutePossible(dangerEdge, safeEdge, veh_type_name):
-#     continue  # pick new edges
-
-route_id = "dynamicRoute" + str(0)
-traci.route.add(routeID=route_id, edges=[dangerEdge, safeEdge]) #these edges are from the rout.xml file, we will try to find a better way of handlimg
-
-utils.generate_car(0, veh_type_name, route_id, 0)
-        
-        # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
-        # will reroute only when at the blocked road
-        # traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
-
-        # blockEdge(safeEdge)
-
-
-
-# temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
-# will reroute only when at the blocked road
-# traci.vehicle.setRoutingMode(carID, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
-
-# blockEdge(safeEdge)
-
-step = 0
-while traci.simulation.getMinExpectedNumber() > 0:
-    traci.simulationStep()
-    vehicle_ids = traci.vehicle.getIDList()  # vehicles currently on network
-    print(vehicle_ids)
-    print("Count:" + str(traci.vehicle.getIDCount()))
-    step += 1
-
-traci.close()
+    main(abs_path_TAZ, sumo_args, 1000, blocked_edges, 42, True)

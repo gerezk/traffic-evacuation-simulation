@@ -27,8 +27,7 @@ def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool) -> p
 
     # Filter for edges that allow given vehicle type
     veh_type_name = "private"
-    danger_zone_name = "Zone_0" # names from ../tmp/TAZ.taz.xml
-    safe_zone_name = "Safe_Zone"
+    safe_zone_name, danger_zone_name = utils.get_zone_names()
     safeTypedRoads, dangerTypedRoads = utils.filter_edges_by_veh_type(root_TAZ, veh_type_name, danger_zone_name, safe_zone_name)
 
     utils.generate_vehicle_type(veh_type_name, 2.6, 4.5, (0, 0, 255), 5, 70, veh_type_name)

@@ -4,8 +4,6 @@ import sumolib
 import traci
 import math
 from pathlib import Path
-import random
-import copy
 
 from utils import a, get_sumo_cmd
 

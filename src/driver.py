@@ -20,6 +20,8 @@ if cfg["gui"]:
 assert cfg["scenario"] in [1, 2, 3], "scenario must be 1, 2, 3"
 assert cfg["n_cars"] > 0, "n_cars must be > 0"
 assert cfg["n_sims"] > 0, "n_sims must be > 0"
+assert isinstance(cfg["blocked_edges"], list), "blocked_edges must be a list"
+assert len(cfg["blocked_edges"]) > 0, "blocked_edges must be list of length > 0"
 assert isinstance(cfg["gui"], bool), "gui must be True or False"
 
 # create results directory and check if results already exist; ask to overwrite or not
@@ -62,11 +64,11 @@ scenario_module = __import__(scenario_name)
 # run n_sims and collect
 dfs = [None] * cfg["n_sims"]
 for i in range(cfg["n_sims"]):
-    print(f"Running simulation {i} of {cfg['n_sims']}")
+    print(f"Running simulation {i+1} of {cfg['n_sims']}")
     if cfg["scenario"] == 1:
         sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], seeds[i], cfg["gui"])
     elif cfg["scenario"] == 2 or cfg["scenario"] == 3: # extra arg needed for marking edge/road to block:
-        sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], cfg["blocked_edge"], seeds[i], cfg["gui"])
+        sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], cfg["blocked_edges"], seeds[i], cfg["gui"])
     else:
         assert False, "Scenario must be 1, 2 or 3; issue not caught in earlier assert."
 

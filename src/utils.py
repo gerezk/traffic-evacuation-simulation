@@ -165,6 +165,10 @@ def blockEdge(edgeID, vehicleType):
     """
     traci.edge.setDisallowed(edgeID, vehicleType)
 
+def get_zone_names():
+    """Hard-coded from TAZ file for now"""
+    return "Safe_Zone", "Zone_0"
+
 def isRoutePossible(from_edge, to_edge, vtype="car"):
     try:
         route = traci.simulation.findRoute(from_edge, to_edge, vType=vtype)
