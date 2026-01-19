@@ -65,22 +65,6 @@ def create_TAZ_file(outf_name, TAZ_list):
             taz.write(outf)
         outf.write("</additional>\n")
 
-def block_roads(zone_edge_list, num_to_block):
-    blocked_edges = []
-    copy_edges_list= copy.deepcopy(zone_edge_list)
-    vehicle_types = traci.vehicletype.getIDList()
-    # todo: handle if too many edges are blocked. eg %80
-    if (len(copy_edges_list)<=num_to_block):
-         raise Exception('too many edges to block')
-    for i in range(num_to_block):
-        selected_int = random.randint(0, len(copy_edges_list))
-        selected_edge_id= copy_edges_list[selected_int]
-        blocked_edges.append(selected_edge_id)
-        copy_edges_list.pop(selected_int)
-
-        traci.edge.setDisallowed(selected_edge_id, "private")
-        # traci.edge.setAllowed(selected_edge_id, "none")
-
 def main():
     network_file = a("../data/neulengbach_sumo-webtools-osm.net.xml.gz")
     danger_TAZ = generateCircularTAZ(network_file, 0, 1250, 1100, 800)

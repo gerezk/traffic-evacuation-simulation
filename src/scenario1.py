@@ -12,7 +12,7 @@ def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool) -> p
     :param n_cars: from config file
     :param seed: child seed generated from parent seed set in config file
     :param gui: from config file
-    :return:
+    :return: pd.dataframe of simulation results
     """
 
     # append seed to sumo args - seed must be set in both random and sumo
@@ -47,10 +47,7 @@ def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool) -> p
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         vehicle_ids = traci.vehicle.getIDList()  # vehicles currently in network
-        # print(vehicle_ids)
-        # print("Count:" + str(traci.vehicle.getIDCount()))
         step += 1
-
     traci.close()
 
     output["total_evac_time"] = step

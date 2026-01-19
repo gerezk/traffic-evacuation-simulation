@@ -25,6 +25,7 @@ assert isinstance(cfg["gui"], bool), "gui must be True or False"
 # create results directory and check if results already exist; ask to overwrite or not
 results_dir = Path("../results")
 results_dir.mkdir(parents=True, exist_ok=True)
+# need to add blocked edge id to csv file name somehow
 csv_file_name = f"{cfg["scenario"]}_{cfg["n_cars"]}_{cfg["n_sims"]}_{cfg["parent_seed"]}.csv"
 if Path(results_dir / csv_file_name).is_file():
     answer = input("Results for the given config.yaml already exist. Do you want to continue? (y/n) ")
@@ -61,6 +62,7 @@ scenario_module = __import__(scenario_name)
 # run n_sims and collect
 dfs = [None] * cfg["n_sims"]
 for i in range(cfg["n_sims"]):
+    print(f"Running simulation {i} of {cfg['n_sims']}")
     if cfg["scenario"] == 1:
         sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], seeds[i], cfg["gui"])
     elif cfg["scenario"] == 2 or cfg["scenario"] == 3: # extra arg needed for marking edge/road to block:
