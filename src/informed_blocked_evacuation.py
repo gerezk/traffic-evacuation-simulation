@@ -1,7 +1,7 @@
 import traci
 import xml.etree.ElementTree as ET
 
-import generate_cars as gc
+import scenario_1 as gc
 from utils import a, get_sumo_cmd
 import generate_TAZs as gTAZ
 
