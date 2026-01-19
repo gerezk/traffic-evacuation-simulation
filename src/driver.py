@@ -5,7 +5,7 @@ import random
 import pandas as pd
 
 import generate_TAZs
-import scenario_1
+import scenario1
 
 
 # load config
@@ -13,29 +13,31 @@ config_path = a(Path("config.yaml"))
 with open(config_path, "r") as f:
     cfg = yaml.safe_load(f)
 
-print(cfg)
-
 # overwrite n_sims if gui set to True
 if cfg["gui"]:
     cfg["n_sims"] = 1
 
 # set sumo args
+abs_path_TAZ_str = a(cfg["rel_path_TAZ"])
 sumo_args = [
     "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
-    "-a", a("../tmp/TAZ.taz.xml") + "," + a("../data/rerouter.add.xml"),
+    "--no-warnings",
+    "-a", abs_path_TAZ_str + "," + a("../data/rerouter.add.xml"),
 ]
 
 # if TAZ.tax.xml not in ../tmp/, create file
-TAZ_path = Path(a("../tmp/TAZ.taz.xml"))
-if not TAZ_path.is_file():
+path_TAZ = Path(abs_path_TAZ_str)
+if not path_TAZ.is_file():
     generate_TAZs.main()
 
 # generate set of random seeds
-random.seed(cfg["seed"])
-seeds = [random.randint(1 << 31, (1 << 32) - 1) for _ in range(cfg["n_sims"])]
+random.seed(cfg["parent_seed"])
+SUMO_MAX_SEED = 2_147_483_647 # 32-bit int limit
+seeds = [random.randint(0, SUMO_MAX_SEED) for _ in range(cfg["n_sims"])] # sample only positive seeds
 
 # run and collect output from n_sims
-#generate_cars.main(cfg, seeds[0])
+for i in range(cfg["n_sims"]):
+    scenario1.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], seeds[i], cfg["gui"])
 
 # combine output to single df
 

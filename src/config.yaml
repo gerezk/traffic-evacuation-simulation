@@ -1,6 +1,7 @@
 scenario: 1 # baseline (1), informed (2), uninformed (3)
 n_cars: 1000 # number of cars
-n_sims: 100 # number of simulations
+n_sims: 3 # number of simulations
 blocked_edge: 489244165#0 # edge id; unused if scenario=1
-seed: 42
+parent_seed: 42 # used to generate a set of child seeds
+rel_path_TAZ: ../tmp/TAZ.taz.xml # relative path to TAZ file
 gui: False # if True, n_sims overwritten to 1

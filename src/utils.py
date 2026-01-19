@@ -2,11 +2,13 @@ from pathlib import Path
 import shutil
 import traci
 import random
+import xml.etree.ElementTree as ET
 
 
 def a(path):
     """
     Return absolute path given a relative path
+    Ensures compatability across platforms
     """
     return str((Path(__file__).parent / path).resolve())
 
@@ -14,9 +16,11 @@ def a(path):
 # Sumo related functions below
 # --------------------------------
 
-# Needed to support use of the flatpack version of sumo
+# ----- Functions related to pathing and running sumo -----
+
 def get_sumo_cmd(base_args, gui=True):
     """
+    Needed to support use of the flatpack version of sumo
     base_args: list of SUMO arguments, e.g.
       ["-n", "net.xml", "-r", "routes.rou.xml", "--step-length", "0.1"]
     """
@@ -26,7 +30,15 @@ def get_sumo_cmd(base_args, gui=True):
         return [binary] + base_args
 
     flatpak_id = "org.eclipse.sumo"
+
     return ["flatpak", "run", flatpak_id] + base_args
+
+def get_root_TAZ(rel_path: str):
+    abs_path = a(rel_path)
+    tree = ET.parse(abs_path)
+    root = tree.getroot()
+
+    return root
 
 def run_sim():
     """
@@ -43,11 +55,47 @@ def run_sim():
 
     traci.close()
 
+# ----- Functions used to setup scenarios -----
+
 def generate_car(veh_id, vehicle_type, route_id, depart_time=0 ): # didn't decide on how to initialize position yet
     # using veh id did not work cause it only counts cars that are currently driving
     traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id) # add to simulation
     #traci.vehicle.setRoutingMode(i, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
+
     return veh_id
+
+def initialize_cars(seed, n_cars, safe_roads, danger_roads, veh_type):
+    """
+    Initialize n_cars in simulation according to the seed and other arguments.
+    Note tight coupling to other functions in utils.py
+    :param seed: based on config file
+    :param n_cars: from config file
+    :param safe_roads: created using filter_edges_by_veh_type()
+    :param danger_roads: created using filter_edges_by_veh_type()
+    :param veh_type: str - should be "private"
+    :return: None
+    """
+    random.seed(seed) # ensure reproducibility in using getRandomEdge
+    for i in range(n_cars):
+        dangerEdge = getRandomEdge(danger_roads, zone="Zone_0") #
+        # print("Random edge in Zone_0:", dangerEdge)
+
+        safeEdge = getRandomEdge(safe_roads, zone="Safe_Zone")
+        # print("Random edge in Safe_Zone:", safeEdge)
+
+        if not isRoutePossible(dangerEdge, safeEdge, veh_type):
+            continue  # pick new edges
+
+        route_id = "dynamicRoute" + str(i)
+        traci.route.add(routeID=route_id, edges=[dangerEdge,
+                                                 safeEdge])  # these edges are from the rout.xml file, we will try to find a better way of handling
+
+        generate_car(i, veh_type, route_id, 0)
+
+        # temporary obstructions: https://sumo.dlr.de/docs/Simulation/Routing.html#handling_of_temporary_obstructions
+        # will reroute only when at the blocked road
+
+        # utils.blockEdge(safeEdge)
 
 def generate_vehicle_type(type_name, accel, decel, color, length, max_speed, veh_class):
     traci.vehicletype.copy("DEFAULT_VEHTYPE", type_name)
@@ -66,7 +114,20 @@ def getEdgesFromTaz(xmlRoot, zone):
 
     # Get all edges
     edges = danger_taz.attrib.get("edges", "").split()
+
     return edges
+
+def filter_edges_by_veh_type(root, veh_type, danger_zone, safe_zone):
+    """Note tight coupling to other functions in utils.py"""
+    privateVehicleRoads = getEdgesForVehicleType(veh_type)
+    dangerRoads = getEdgesFromTaz(root, danger_zone)
+    safeRoads = getEdgesFromTaz(root, safe_zone)
+
+    # Sort lists after to ensure order consistent across runs (reproducibility)
+    safeTypedRoads = sorted(list(set(privateVehicleRoads) & set(safeRoads)))  # both conditions
+    dangerTypedRoads = sorted(list(set(privateVehicleRoads) & set(dangerRoads)))  # both conditions
+
+    return safeTypedRoads, dangerTypedRoads
 
 def getRandomEdge(edges, zone):
     if not edges:

@@ -2,7 +2,7 @@ import traci
 import xml.etree.ElementTree as ET
 import sumolib
 
-import scenario_1 as gc
+import scenario1 as gc
 from utils import a, get_sumo_cmd
 
 
