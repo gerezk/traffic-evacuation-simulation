@@ -117,11 +117,38 @@ def getEdgesFromTaz(xmlRoot, zone):
 
     return edges
 
-def filter_edges_by_veh_type(root, veh_type, danger_zone, safe_zone):
+def getPolygonFromTaz(xmlRoot, zone):
+    # Find the Zone_0 TAZ (Danger)
+    danger_taz = xmlRoot.find(".//taz[@id='" + zone + "']")
+    if danger_taz is None:
+        raise ValueError("TAZ Danger_Zone_0 not found")
+
+    shape_str = danger_taz.attrib["shape"]
+    polygon = [
+        tuple(map(float, p.split(",")))
+        for p in shape_str.split()
+    ]
+    return polygon
+
+def point_in_polygon(x, y, polygon):
+    inside = False
+    n = len(polygon)
+    px, py = polygon[0]
+
+    for i in range(1, n + 1):
+        nx, ny = polygon[i % n]
+        if ((py > y) != (ny > y)) and \
+           (x < (nx - px) * (y - py) / (ny - py + 1e-12) + px):
+            inside = not inside
+        px, py = nx, ny
+
+    return inside
+
+def filter_edges_by_veh_type(root, veh_type, safe_zone, danger_zone):
     """Note tight coupling to other functions in utils.py"""
     privateVehicleRoads = getEdgesForVehicleType(veh_type)
-    dangerRoads = getEdgesFromTaz(root, danger_zone)
     safeRoads = getEdgesFromTaz(root, safe_zone)
+    dangerRoads = getEdgesFromTaz(root, danger_zone)
 
     # Sort lists after to ensure order consistent across runs (reproducibility)
     safeTypedRoads = sorted(list(set(privateVehicleRoads) & set(safeRoads)))  # both conditions

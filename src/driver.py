@@ -54,7 +54,8 @@ seeds = [random.randint(0, SUMO_MAX_SEED) for _ in range(cfg["n_sims"])] # sampl
 sumo_args = [
     "-n", a("../data/neulengbach_sumo-webtools-osm.net.xml.gz"),
     "--no-warnings",
-    "-a", abs_path_TAZ_str + "," + a("../data/rerouter.add.xml"),
+    "-a", abs_path_TAZ_str#y
+    # + "," + a("../data/rerouter.add.xml")
 ]
 
 # import correct scenario.py given cfg
