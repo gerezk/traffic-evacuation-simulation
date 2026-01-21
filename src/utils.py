@@ -40,20 +40,46 @@ def get_root_TAZ(rel_path: str):
 
     return root
 
-def run_sim():
+def run_sim(danger_polygon) -> dict:
     """
     Run simulation and collect results.
     :return:
     """
-    step = 0
+    # structures to keep track of individual vehicles
+    evacuation_time = {}  # vehID -> time
+    was_inside = {}  # vehID -> bool
+
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
-        vehicle_ids = traci.vehicle.getIDList()  # vehicles currently on network
-        print(vehicle_ids)
-        print("Count:" + str(traci.vehicle.getIDCount()))
-        step += 1
+        t = traci.simulation.getTime()
+
+        # get set of vehicles that have not yet evacuated
+        vehicles_still_inside = set(traci.vehicle.getIDList()) # all vehicles in the sim at current time step
+        vehicles_still_inside = vehicles_still_inside.difference(set(evacuation_time.keys()))
+
+        # terminate sim if all cars evacuated, even if there are cars left still driving to their destinations
+        if len(vehicles_still_inside) == 0:
+            break
+
+        # iterate over all vehicles still inside and check if they crossed into the safe zone
+        for veh_id in vehicles_still_inside:
+            x, y = traci.vehicle.getPosition(veh_id)
+            inside = point_in_polygon(x, y, danger_polygon)
+
+            if veh_id not in was_inside:
+                was_inside[veh_id] = inside
+                continue
+
+            # mark vehicle's first exit from the danger zone
+            if was_inside[veh_id] and not inside:
+                evacuation_time[veh_id] = t
+                # print(f"Vehicle {veh_id} evacuated at {t:.1f}s")
+
+            was_inside[veh_id] = inside
 
     traci.close()
+
+    return evacuation_time
 
 # ----- Functions used to setup scenarios -----
 

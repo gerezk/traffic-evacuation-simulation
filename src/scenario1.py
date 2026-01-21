@@ -60,7 +60,6 @@ def main(path_TAZ: str, args: List[str], n_cars: int, seed: int, gui: bool) -> p
 
         # terminate sim if all cars evacuated, even if there are cars left still driving to their destinations
         if len(vehicles_still_inside) == 0:
-            print('All cars evacuated')
             break
 
         # iterate over all vehicles still inside and check if they crossed into the safe zone
@@ -92,4 +91,4 @@ if __name__ == "__main__":
         "-a", abs_path_TAZ# + "," + utils.a("../data/rerouter.add.xml")
     ]
 
-    main(abs_path_TAZ, sumo_args, 1000,42, True)
+    main(abs_path_TAZ, sumo_args, 1500,42, True)
