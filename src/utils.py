@@ -102,6 +102,7 @@ def initialize_cars(seed, n_cars, safe_roads, danger_roads, veh_type):
     :return: None
     """
     random.seed(seed) # ensure reproducibility in using getRandomEdge
+    
     for i in range(n_cars):
         dangerEdge = getRandomEdge(danger_roads, zone="Zone_0") #
         # print("Random edge in Zone_0:", dangerEdge)
@@ -113,8 +114,7 @@ def initialize_cars(seed, n_cars, safe_roads, danger_roads, veh_type):
             continue  # pick new edges
 
         route_id = "dynamicRoute" + str(i)
-        traci.route.add(routeID=route_id, edges=[dangerEdge,
-                                                 safeEdge])  # these edges are from the rout.xml file, we will try to find a better way of handling
+        traci.route.add(routeID=route_id, edges=[dangerEdge, safeEdge])
 
         generate_car(i, veh_type, route_id, 0)
 

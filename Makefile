@@ -1,8 +1,5 @@
-test: 
-	python3 ./src/test.py
-
-cars: 
-	python3 ./src/generate_cars.py
+driver: 
+	python3 ./src/driver.py
 
 taz: 
 	python3 ./src/generate_TAZs.py

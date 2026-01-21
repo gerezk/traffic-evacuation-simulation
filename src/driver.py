@@ -28,7 +28,7 @@ assert isinstance(cfg["gui"], bool), "gui must be True or False"
 results_dir = Path("../results")
 results_dir.mkdir(parents=True, exist_ok=True)
 # need to add blocked edge id to csv file name somehow
-csv_file_name = f"{cfg["scenario"]}_{cfg["n_cars"]}_{cfg["n_sims"]}_{cfg["parent_seed"]}.csv"
+csv_file_name = f"{cfg['scenario']}_{cfg['n_cars']}_{cfg['n_sims']}_{cfg['parent_seed']}.csv"
 if Path(results_dir / csv_file_name).is_file():
     answer = input("Results for the given config.yaml already exist. Do you want to continue? (y/n) ")
     if answer in ["y", "Y", "Yes", "yes"]:
@@ -59,7 +59,7 @@ sumo_args = [
 ]
 
 # import correct scenario.py given cfg
-scenario_name = f"scenario{cfg["scenario"]}"
+scenario_name = f"scenario{cfg['scenario']}"
 scenario_module = __import__(scenario_name)
 
 # run n_sims and collect

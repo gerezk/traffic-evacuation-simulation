@@ -1,6 +1,6 @@
 ## PBF Fileformat
 
-PBF is a fileformat to store osm files mor efficiently.
+PBF is a fileformat to store osm files more efficiently.
 
 You can download pbf's from here [OSM exports for Wien by BBBike.org](https://download.bbbike.org/osm/bbbike/Wien/)
 
@@ -17,7 +17,7 @@ This tool is included with sumo
 ### Windows:
 
 ```
-PS C:\Program Files (x86)\Eclipse\Sumo\tools> py .\osmWebWizard.py
+py 'C:\Program Files (x86)\Eclipse\Sumo\tools\osmWebWizard.py'
 ```
 
 ### Linux:
@@ -28,7 +28,7 @@ PS C:\Program Files (x86)\Eclipse\Sumo\tools> py .\osmWebWizard.py
 
 Navigate to the region of interest
 
-Press download (It will log where the exported files will be stored)
+Press "Generate Scenario" (It will log where the exported files will be stored)
 
 For me it's `C:\Users\<username>\Sumo\<date>`
 
@@ -43,7 +43,7 @@ generate random trips:
 `python "C:\Program Files (x86)\Eclipse\Sumo\tools\randomTrips.py"`
 
 With parameters:
-`-n ./data/neulengbach_sumo-webtools-osm.net.xml.gz -o ./data/routes.rou.xml --end 3600 --period 1.5 --vehicle-class passenger --allow-fringe`
+`-n ./data/neulengbach_sumo-webtools-osm.net.xml.gz -o ./data/routes.rou.xml --end 3600 --period 1.5 --vehicle-class car --allow-fringe`
 
 For some reason it does not generate vehicles, so that's all for now. Probably need to do that in python?  
     - It does generate vehicles, you can see them when you run the simulation. They are small and they slowly all escape the frame.
