@@ -7,7 +7,7 @@ import pandas as pd
 # read in results
 results_dir = Path("../results") # assumed to already exist
 csv_files = ["1_1000_100_42.csv",
-             "2_1000_100_42.csv",
+             "2_1000_bahnstrasse_100_42.csv",
              "2_500_100_42.csv",
              "2_1500_100_42.csv"]
 selected_csv = csv_files[0]
@@ -36,13 +36,13 @@ for config in configs:
 colors = sns.color_palette("colorblind", n_colors=4)
 fig, ax = plt.subplots()
 for i in range(len(dfs)):
-    sns.histplot(dfs[i]["total_evac_time"], bins=20, ax=ax, kde=False, alpha=0.4,
+    sns.histplot(dfs[i]["total_evac_time"] / 60, bins=20, ax=ax, kde=False, alpha=0.4, # convert from s to min
                  label=labels[i],
                  color=colors[i])
-    plt.axvline(dfs[i]["total_evac_time"].mean(), linestyle="--",
+    plt.axvline(dfs[i]["total_evac_time"].mean() / 60, linestyle="--",
                 color=colors[i])
 ax.set_title("Histogram of Total Evacuation Time for Various Scenarios")
-ax.set_xlabel("Total Evacuation Time (s)")
+ax.set_xlabel("Total Evacuation Time (min)")
 ax.legend()
 plt.tight_layout()
 

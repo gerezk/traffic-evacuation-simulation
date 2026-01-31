@@ -12,23 +12,35 @@ config_path = a(Path("config.yaml"))
 with open(config_path, "r") as f:
     cfg = yaml.safe_load(f)
 
+# check config values
+if cfg["scenario"] not in [1, 2, 3]:
+    raise ValueError("scenario must be 1, 2, or 3")
+if cfg["n_cars"] <= 0:
+    raise ValueError("n_cars must be > 0")
+if cfg["n_sims"] <= 0:
+    raise ValueError("n_sims must be > 0")
+if not isinstance(cfg["blocked_edges"], list):
+    raise ValueError("blocked_edges must be a list")
+if cfg["scenario"] in [2, 3] and len(cfg["blocked_edges"]) <= 0:
+    raise ValueError("blocked_edges must be list of length > 0 for scenarios 2 and 3")
+if not isinstance(cfg["gui"], bool):
+    raise ValueError("gui must be True or False")
+
 # overwrite n_sims if gui set to True
 if cfg["gui"]:
     cfg["n_sims"] = 1
 
-# check cfg input - need to check if blocked_edge in danger zone
-assert cfg["scenario"] in [1, 2, 3], "scenario must be 1, 2, 3"
-assert cfg["n_cars"] > 0, "n_cars must be > 0"
-assert cfg["n_sims"] > 0, "n_sims must be > 0"
-assert isinstance(cfg["blocked_edges"], list), "blocked_edges must be a list"
-assert len(cfg["blocked_edges"]) > 0, "blocked_edges must be list of length > 0"
-assert isinstance(cfg["gui"], bool), "gui must be True or False"
+# process "blocked_street_name" depending on value of "scenario"
+if cfg["scenario"] == 1:
+    cfg["blocked_street_name"] = ""
+else:
+    cfg["blocked_street_name"] = cfg["blocked_street_name"] + "_" # separator for csv file name
 
 # create results directory and check if results already exist; ask to overwrite or not
 results_dir = Path("../results")
 results_dir.mkdir(parents=True, exist_ok=True)
 # need to add blocked edge id to csv file name somehow
-csv_file_name = f"{cfg['scenario']}_{cfg['n_cars']}_{cfg['n_sims']}_{cfg['parent_seed']}.csv"
+csv_file_name = f"{cfg['scenario']}_{cfg['n_cars']}_{cfg["blocked_street_name"]}{cfg['n_sims']}_{cfg['parent_seed']}.csv"
 if Path(results_dir / csv_file_name).is_file():
     answer = input("Results for the given config.yaml already exist. Do you want to continue? (y/n) ")
     if answer in ["y", "Y", "Yes", "yes"]:
@@ -43,7 +55,7 @@ if Path(results_dir / csv_file_name).is_file():
 abs_path_TAZ_str = a(cfg["rel_path_TAZ"])
 path_TAZ = Path(abs_path_TAZ_str)
 if not path_TAZ.is_file():
-    generate_TAZs.main()
+    generate_TAZs.main(gui=False)
 
 # generate set of random seeds
 random.seed(cfg["parent_seed"])

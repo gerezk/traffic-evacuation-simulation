@@ -63,7 +63,7 @@ def create_TAZ_file(outf_name, TAZ_list):
             taz.write(outf)
         outf.write("</additional>\n")
 
-def main():
+def main(gui=False):
     network_file = a("../data/neulengbach_sumo-webtools-osm.net.xml.gz")
     danger_TAZ = generateCircularTAZ(network_file, 0, 1250, 1100, 800)
     blocked_TAZ = generateCircularTAZ(network_file, 1, 1250, 1100, 500, color=(120, 120, 0,
@@ -82,7 +82,7 @@ def main():
         "-r", dangerTAZfileName
     ]
 
-    SUMO_CMD = get_sumo_cmd(args, gui=False)
+    SUMO_CMD = get_sumo_cmd(args, gui=gui)
 
     traci.start(SUMO_CMD)
 
@@ -107,4 +107,4 @@ def main():
     traci.close()
 
 if __name__ == "__main__":
-    main()
+    main(gui=True)
