@@ -91,4 +91,4 @@ if __name__ == "__main__":
     ]
     blocked_roads = ["489244165#0", "-489244165#1"]
 
-    main(abs_path_TAZ, sumo_args, 1000, blocked_roads, 42, True)
+    main(abs_path_TAZ, sumo_args, 100, blocked_roads, 42, True)

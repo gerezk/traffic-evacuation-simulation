@@ -3,6 +3,7 @@ import shutil
 import traci
 import random
 import xml.etree.ElementTree as ET
+import sumolib
 
 
 def a(path):
@@ -228,3 +229,27 @@ def isRoutePossible(from_edge, to_edge, vtype="car"):
         return len(route.edges) > 0
     except traci.exceptions.TraCIException:
         return False
+
+
+def get_adjacent_edges(start_edge, steps, net):
+    visited = set()
+    frontier = {start_edge}
+
+    for _ in range(steps):
+        next_frontier = set()
+
+        for edge in frontier:
+            if edge in visited:
+                continue
+
+            visited.add(edge)
+
+            for succ in net.getEdge(edge).getOutgoing():
+                next_frontier.add(succ.getID())
+
+            for pred in net.getEdge(edge).getIncoming():
+                next_frontier.add(pred.getID())
+
+        frontier = next_frontier
+
+    return visited

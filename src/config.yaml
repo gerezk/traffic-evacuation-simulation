@@ -1,7 +1,7 @@
-scenario: 1 # baseline (1), informed (2), uninformed (3)
-n_cars: 1000 # number of cars
-n_sims: 100 # number of simulations
-blocked_edges: [-708937627#0, 1097648611] # list of edge ids; unused if scenario=1
+scenario: 2 # baseline (1), informed (2), uninformed (3)
+n_cars: 100 # number of cars
+n_sims: 10 # number of simulations
+blocked_edges: ["489244165#0", "-489244165#1"] # list of edge ids; unused if scenario=1
 blocked_street_name: oberehofstatt # manually determine from GUI
 parent_seed: 42 # used to generate a set of child seeds
 rel_path_TAZ: ../tmp/TAZ.taz.xml # relative path to TAZ file

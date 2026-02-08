@@ -80,8 +80,11 @@ for i in range(cfg["n_sims"]):
     print(f"Running simulation {i+1} of {cfg['n_sims']}")
     if cfg["scenario"] == 1:
         sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], seeds[i], cfg["gui"])
-    elif cfg["scenario"] == 2 or cfg["scenario"] == 3: # extra arg needed for marking edge/road to block:
+    elif cfg["scenario"] == 2 : # extra arg needed for marking edge/road to block:
         sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], cfg["blocked_edges"], seeds[i], cfg["gui"])
+    elif cfg["scenario"] == 3: # extra arg needed for marking edge/road to block:
+        sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], cfg["blocked_edges"], seeds[i], cfg["gui"])
+
     else:
         assert False, "Scenario must be 1, 2 or 3; issue not caught in earlier assert."
 
