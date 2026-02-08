@@ -84,12 +84,11 @@ def run_sim(danger_polygon) -> dict:
 
 # ----- Functions used to setup scenarios -----
 
-def generate_car(veh_id, vehicle_type, route_id, depart_time=0 ): # didn't decide on how to initialize position yet
-    # using veh id did not work cause it only counts cars that are currently driving
-    traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id) # add to simulation
-    #traci.vehicle.setRoutingMode(i, constants.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS)
-
-    return veh_id
+def generate_car(veh_id, vehicle_type, route_id, depart_time=0 ):
+    """
+    Add car into simulation
+    """
+    traci.vehicle.add(vehID=veh_id, typeID=vehicle_type, depart=depart_time, routeID=route_id)
 
 def initialize_cars(seed, n_cars, safe_roads, danger_roads, veh_type):
     """
@@ -230,6 +229,15 @@ def isRoutePossible(from_edge, to_edge, vtype="car"):
     except traci.exceptions.TraCIException:
         return False
 
+def get_reachable_danger_edges(safe_edges, danger_edges, vtype="private"):
+    reachable_danger_edges = []
+    for edge in danger_edges:
+        if any(
+                traci.simulation.findRoute(edge, safe, vType=vtype).edges
+                for safe in safe_edges
+        ):
+            reachable_danger_edges.append(edge)
+    return reachable_danger_edges
 
 def get_adjacent_edges(start_edge, steps, net):
     visited = set()

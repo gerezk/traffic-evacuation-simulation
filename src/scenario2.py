@@ -32,6 +32,9 @@ def main(path_TAZ: str, args: List[str], n_cars: int, blocked_edges: List[str], 
     # get danger zone polygon from TAZ
     danger_polygon = utils.getPolygonFromTaz(root_TAZ, danger_zone_name)
 
+    # get reachable danger edges given blocked road
+    dangerTypedRoads = utils.get_reachable_danger_edges(safeTypedRoads, dangerTypedRoads, veh_type_name)
+
     # initialize n_cars in the sim
     utils.initialize_cars(seed, n_cars, safeTypedRoads, dangerTypedRoads, veh_type_name)
 
@@ -90,5 +93,6 @@ if __name__ == "__main__":
         "-a", utils.a("../tmp/TAZ.taz.xml"),
     ]
     blocked_roads = ["489244165#0", "-489244165#1"]
+  #  blocked_roads = ["-708937627#0", "1097648611"]
 
     main(abs_path_TAZ, sumo_args, 100, blocked_roads, 42, True)

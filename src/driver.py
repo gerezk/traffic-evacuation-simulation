@@ -23,6 +23,8 @@ if not isinstance(cfg["blocked_edges"], list):
     raise ValueError("blocked_edges must be a list")
 if cfg["scenario"] in [2, 3] and len(cfg["blocked_edges"]) <= 0:
     raise ValueError("blocked_edges must be list of length > 0 for scenarios 2 and 3")
+if not isinstance(cfg["parent_seed"], int):
+    raise ValueError("parent_seed must be an int")
 if not isinstance(cfg["gui"], bool):
     raise ValueError("gui must be True or False")
 
@@ -39,7 +41,6 @@ else:
 # create results directory and check if results already exist; ask to overwrite or not
 results_dir = Path("../results")
 results_dir.mkdir(parents=True, exist_ok=True)
-# need to add blocked edge id to csv file name somehow
 csv_file_name = f"{cfg['scenario']}_{cfg['n_cars']}_{cfg["blocked_street_name"]}{cfg['n_sims']}_{cfg['parent_seed']}.csv"
 if Path(results_dir / csv_file_name).is_file():
     answer = input("Results for the given config.yaml already exist. Do you want to continue? (y/n) ")
@@ -86,7 +87,7 @@ for i in range(cfg["n_sims"]):
         sim_output = scenario_module.main(abs_path_TAZ_str, sumo_args, cfg["n_cars"], cfg["blocked_edges"], seeds[i], cfg["gui"])
 
     else:
-        assert False, "Scenario must be 1, 2 or 3; issue not caught in earlier assert."
+        raise ValueError("Scenario must be 1, 2 or 3; issue not caught in earlier check.")
 
     dfs[i] = sim_output
 
