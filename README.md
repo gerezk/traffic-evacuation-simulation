@@ -7,3 +7,4 @@
    pip install -r requirements.txt
    ```
    1. Python v3.12.12 was used.
+4. Adjust `config.yaml` as needed and run `driver.py`.
